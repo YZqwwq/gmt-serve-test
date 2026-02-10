@@ -3,7 +3,7 @@ import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify'
 import { Semaphore } from './semaphore'
 import { renderRequestSchema, renderToImage } from './render'
 
-const port = Number(process.env.PORT ?? '18381')
+const port = Number(process.env.PORT ?? '18081')
 const host = process.env.HOST ?? '0.0.0.0'
 
 const concurrency = Number(process.env.RENDER_CONCURRENCY ?? '2')

@@ -27,7 +27,8 @@ async function takeScreenshot(options) {
         const buffer = await page.screenshot({
             fullPage: options.fullPage,
             type: options.format,
-            quality: options.format === 'jpeg' ? options.quality : undefined
+            quality: options.format === 'jpeg' ? options.quality : undefined,
+            timeout: options.timeoutMs
         });
         const size = await page.evaluate(() => ({
             width: document.documentElement.scrollWidth,
