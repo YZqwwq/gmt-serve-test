@@ -3,7 +3,7 @@ import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify'
 import { Semaphore } from './semaphore'
 import { renderRequestSchema, renderToImage } from './render'
 
-const port = Number(process.env.PORT ?? '5179')
+const port = Number(process.env.PORT ?? '18381')
 const host = process.env.HOST ?? '0.0.0.0'
 
 const concurrency = Number(process.env.RENDER_CONCURRENCY ?? '2')
@@ -16,9 +16,13 @@ const app = Fastify({
   bodyLimit: 2 * 1024 * 1024
 })
 
-app.get('/health', async () => ({ ok: true }))
+const apiPrefix = '/middle-server/api'
 
-app.post('/render', async (request: FastifyRequest<{ Body: unknown }>, reply: FastifyReply) => {
+async function healthHandler(): Promise<{ ok: true }> {
+  return { ok: true }
+}
+
+async function renderHandler(request: FastifyRequest<{ Body: unknown }>, reply: FastifyReply) {
   const parsed = renderRequestSchema.safeParse(request.body)
   if (!parsed.success) {
     reply.code(400)
@@ -40,7 +44,13 @@ app.post('/render', async (request: FastifyRequest<{ Body: unknown }>, reply: Fa
   } finally {
     release()
   }
-})
+}
+
+app.get('/health', healthHandler)
+app.get(`${apiPrefix}/health`, healthHandler)
+
+app.post('/render', renderHandler)
+app.post(`${apiPrefix}/render`, renderHandler)
 
 app
   .listen({ port, host })

@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fastify_1 = __importDefault(require("fastify"));
 const semaphore_1 = require("./semaphore");
 const render_1 = require("./render");
-const port = Number(process.env.PORT ?? '5179');
+const port = Number(process.env.PORT ?? '18081');
 const host = process.env.HOST ?? '0.0.0.0';
 const concurrency = Number(process.env.RENDER_CONCURRENCY ?? '2');
 const maxStitchHeight = Number(process.env.MAX_STITCH_HEIGHT ?? '30000');
@@ -15,8 +15,11 @@ const app = (0, fastify_1.default)({
     logger: true,
     bodyLimit: 2 * 1024 * 1024
 });
-app.get('/health', async () => ({ ok: true }));
-app.post('/render', async (request, reply) => {
+const apiPrefix = '/middle-server/api';
+async function healthHandler() {
+    return { ok: true };
+}
+async function renderHandler(request, reply) {
     const parsed = render_1.renderRequestSchema.safeParse(request.body);
     if (!parsed.success) {
         reply.code(400);
@@ -39,7 +42,11 @@ app.post('/render', async (request, reply) => {
     finally {
         release();
     }
-});
+}
+app.get('/health', healthHandler);
+app.get(`${apiPrefix}/health`, healthHandler);
+app.post('/render', renderHandler);
+app.post(`${apiPrefix}/render`, renderHandler);
 app
     .listen({ port, host })
     .then(() => undefined)
